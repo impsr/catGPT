@@ -5,6 +5,10 @@ const askBtn = document.querySelector('#ask');
 input.addEventListener('keyup', handleEnter);
 askBtn?.addEventListener('click', handleAsk);
 
+const loading = document.createElement('div');
+loading.className = 'my-6 animate-pulse text-neutral-400';
+loading.textContent = 'Thinking...'
+
 async function generate(text){
     const msg = document.createElement('div');
     msg.className = 'my-6  bg-neutral-800 p-3 rounded-xl ml-auto max-w-fit'
@@ -12,11 +16,16 @@ async function generate(text){
     chatContainer?.appendChild(msg);
     input.value = '';
 
+    chatContainer.appendChild(loading);
+
     const assistantMessage = await callServer(text);
 
     const assistantMsgElem = document.createElement('div');
     assistantMsgElem.className = 'max-w-fit';
     assistantMsgElem.textContent = assistantMessage;
+
+    loading.remove(); 
+
     chatContainer?.appendChild(assistantMsgElem);
 }
 
@@ -48,7 +57,7 @@ async function callServer(inputText){
 
 
 function handleEnter(e){
-    if (e.key === 'Enter'){
+    if (e.key === 'Enter'){ 
         const text = input?.value.trim();
         if(!text){
             return;
