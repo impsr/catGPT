@@ -5,13 +5,16 @@ import readline from "node:readline/promises"
 
 import Groq from "groq-sdk";
 import {tavily} from "@tavily/core";
+import  NodeCache from 'node-cache';
+
 
 const tvly = tavily({ apiKey: process.env.TAVILY_SEARCH_API_KEY});
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const cache = new NodeCache({stdTTL: 60 * 60 * 24}); //24 HRS LATER DATA WILL BE CLEARED
+ 
+export async function generate(userMessage, threadId) {
 
-export async function generate(userMessage) {
-
-    const messages = [
+    const baseMessages = [
             {
                 role : 'system',
                 content : `You are a smart personal assistant who answers the asked questions.
@@ -32,10 +35,12 @@ export async function generate(userMessage) {
                         
                         Current datetime: ${new Date().toUTCString()}`
             },
-    ]    
+    ];
     
     
-
+    const messages = cache.get(threadId) ?? baseMessages;
+    
+    
         messages.push({
             role: 'user',
             content: userMessage
@@ -73,6 +78,9 @@ export async function generate(userMessage) {
             const toolCalls = completion.choices[0].message.tool_calls;
 
             if(!toolCalls){
+
+                cache.set(threadId, messages);
+                console.log(cache);
                 return completion.choices[0].message.content;
             }
 
