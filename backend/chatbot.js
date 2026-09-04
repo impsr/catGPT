@@ -46,7 +46,18 @@ export async function generate(userMessage, threadId) {
             content: userMessage
         });
 
+        const MAX_RETRIES = 10;
+        let count = 0;
+
+
         while(true){
+
+            if(count > MAX_RETRIES ){
+                return "I Could not find the result , please try again!";
+            }
+
+            count++;
+            
             const completion = await groq.chat.completions.create({
                 model: 'openai/gpt-oss-120b',
                 temperature: 0,
